@@ -135,6 +135,14 @@ if [ $INSTALLED -eq 0 ]; then
     if dpkg -l "${deb_packages[@]}" 1>/dev/null 2>/dev/null; then
       echo "All Packages Installed..."
     else
+      if lsof /var/lib/dpkg/lock >/dev/null; then
+        echo -n "Waiting free apt"
+        while lsof /var/lib/dpkg/lock >/dev/null; do
+          sleep 1
+          echo -n .
+        done
+        echo Ended.
+      fi
       echo "Installing packages..."
       if ! apt-get install -y "${deb_packages[@]}" 1>/dev/null 2>/dev/null; then
         echo "Something wrong with installing packages: " "${deb_packages[@]}"
