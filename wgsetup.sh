@@ -197,8 +197,8 @@ PostUp = $POST_UP
 PostDown = $POST_DOWN
 " >"$WG_DIR/wg0.conf"
 
-  # wg-quick up wg0
-  # systemctl enable wg-quick@wg0
+  wg-quick up wg0
+  systemctl enable wg-quick@wg0
 
 else
   PORT=$(grep "ListenPort" $WG_DIR/wg0.conf | awk '{print$3}')
@@ -275,6 +275,6 @@ PublicKey = $pub_key
 AllowedIPs = $ClientIP
 " >>$WG_DIR/wg0.conf
 
-  # wg-quick down wg0
-  # wg-quick up wg0
+  wg-quick down wg0
+  wg-quick up wg0
 fi
