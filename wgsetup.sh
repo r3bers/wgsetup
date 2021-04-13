@@ -141,7 +141,7 @@ if [[ $INSTALLED -eq 0 ]]; then
         echo -n "Waiting free apt"
         APT_BUSY=0
         MS=30
-        while [[ 0 -ne $APT_BUSY || 0 -ne $MS ]]; do
+        while [[ $APT_BUSY -ne 0 || $MS -ne 0 ]]; do
           MS=30
           APT_BUSY=0
           while [[ 0 -ne $MS ]]; do
@@ -150,11 +150,11 @@ if [[ $INSTALLED -eq 0 ]]; then
             fi
             sleep 0.1
             echo -n .
-            MS=$((MS - 1))
+            ((MS--))
           done
         done
         echo Ended.
-        TRYS=$((TRYS - 1))
+        ((TRYS--))
       done
       if [[ $TRYS -eq 0 ]]; then
         echo "Something wrong with installing packages." "${deb_packages[@]}"
