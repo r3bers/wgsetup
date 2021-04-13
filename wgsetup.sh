@@ -30,31 +30,31 @@ fi
 WG_DIR="/etc/wireguard"
 INSTALLED=1
 
-if ! [ -d "/$WG_DIR" ]; then
+if ! [[ -d "/$WG_DIR" ]]; then
   INSTALLED=0
   echo "No WireGuard folder. Creating..."
   mkdir -m 700 "$WG_DIR"
 fi
 
-if ! [ -d "/$WG_DIR/keys" ]; then
+if ! [[ -d "/$WG_DIR/keys" ]]; then
   INSTALLED=0
   echo "No Keys folder. Creating..."
   mkdir -m 700 "/$WG_DIR/keys"
 fi
 
-if ! [ -d "/$WG_DIR/clients" ]; then
+if ! [[ -d "/$WG_DIR/clients" ]]; then
   INSTALLED=0
   echo "No Clients folder. Creating..."
   mkdir -m 700 "/$WG_DIR/clients"
 fi
 
-if ! [ -d "/$WG_DIR/qr" ]; then
+if ! [[ -d "/$WG_DIR/qr" ]]; then
   INSTALLED=0
   echo "No QRCode folder. Creating..."
   mkdir -m 700 "/$WG_DIR/qr"
 fi
 
-if ! [ -f "/$WG_DIR/wg0.conf" ]; then
+if ! [[ -f "/$WG_DIR/wg0.conf" ]]; then
   INSTALLED=0
   echo "No wg0.conf. Creating..."
   touch "/$WG_DIR/wg0.conf"
@@ -84,7 +84,7 @@ echo "External IPv4: $EIPv4"
 echo "Device IPv4: $DEVv4"
 
 # External IPv6
-if [ $IPV6E -eq 1 ]; then
+if [[ $IPV6E -eq 1 ]]; then
   EIPv6=$(ip -6 a show scope global | grep inet6 | awk -F '[ \t]+|/' '{print $3}')
   DEVv6=$(ip -oneline -6 a | grep "$EIPv6" | awk '{print$2}')
   ENETv6=$(ip -6 a show scope global | grep "$EIPv6" | awk '{print$2}')
@@ -93,7 +93,7 @@ if [ $IPV6E -eq 1 ]; then
   echo "Device IPv6: $DEVv6"
 fi
 
-if [ $INSTALLED -eq 0 ]; then
+if [[ $INSTALLED -eq 0 ]]; then
   # Enable IPv4 forwarding
   if ! sysctl net.ipv4.ip_forward | grep 1 >/dev/null; then
     sysctl -w net.ipv4.ip_forward=1
@@ -116,7 +116,7 @@ if [ $INSTALLED -eq 0 ]; then
     echo "net.ipv4.conf.all.send_redirects = 0" >>/etc/sysctl.conf
   fi
 
-  if [ $IPV6E -eq 1 ]; then
+  if [[ $IPV6E -eq 1 ]]; then
     # Enable IPv6 forwarding
     if ! sysctl net.ipv6.conf.default.forwarding | grep 1 >/dev/null; then
       sysctl -w net.ipv6.conf.default.forwarding=1
@@ -137,7 +137,7 @@ if [ $INSTALLED -eq 0 ]; then
     else
       echo "Installing packages..."
       TRYS=5
-      while ! apt-get install -y "${deb_packages[@]}" 1>/dev/null 2>/dev/null || $TRYS -ne 0; do
+      while ! apt-get install -y "${deb_packages[@]}" 1>/dev/null 2>/dev/null || [[ $TRYS -ne 0 ]]; do
         echo -n "Waiting free apt"
         APT_BUSY=0
         MS=30
@@ -156,7 +156,7 @@ if [ $INSTALLED -eq 0 ]; then
         echo Ended.
         TRYS=$((TRYS - 1))
       done
-      if $TRYS -eq 0; then
+      if [[ $TRYS -eq 0 ]]; then
         echo "Something wrong with installing packages." "${deb_packages[@]}"
         exit 1
       fi
@@ -189,7 +189,7 @@ if [ $INSTALLED -eq 0 ]; then
     esac
   fi
 
-  if [ "$PORT" -ge 1 ] && [ "$PORT" -le 65535 ]; then
+  if [[ "$PORT" -ge 1 ]] && [[ "$PORT" -le 65535 ]]; then
     echo "Port: $PORT"
   else
     echo "Port out of range 1-65535."
@@ -204,7 +204,7 @@ if [ $INSTALLED -eq 0 ]; then
   POST_UP="iptables -A FORWARD -i wg0 -j ACCEPT; iptables -t nat -A POSTROUTING -o $DEVv4 -j MASQUERADE"
   POST_DOWN="iptables -D FORWARD -i wg0 -j ACCEPT; iptables -t nat -D POSTROUTING -o $DEVv4 -j MASQUERADE"
 
-  if [ $IPV6E -eq 1 ]; then
+  if [[ $IPV6E -eq 1 ]]; then
     ExternalADDR=$ExternalADDR",$ENETv6"
     POST_UP=$POST_UP"; ip6tables -A FORWARD -i wg0 -j ACCEPT; ip6tables -t nat -A POSTROUTING -o $DEVv6 -j MASQUERADE"
     POST_DOWN=$POST_DOWN"; ip6tables -D FORWARD -i wg0 -j ACCEPT; ip6tables -t nat -D POSTROUTING -o $DEVv6 -j MASQUERADE"
@@ -225,7 +225,7 @@ else
   PORT=$(grep "ListenPort" $WG_DIR/wg0.conf | awk '{print$3}')
 fi
 
-if [ $# -eq 0 ]; then
+if [[ $# -eq 0 ]]; then
   echo "Usage wgsetup <username>"
 else
 
@@ -241,7 +241,7 @@ else
   fi
 
   # WireGuard IPv6 Calculation
-  if [ $IPV6E -eq 1 ]; then
+  if [[ $IPV6E -eq 1 ]]; then
     if subnetcalc $NET6 -nocolor -n >/dev/null; then
       DELIM="::"
       WG_IP6=$(subnetcalc $NET6 -nocolor -n | grep "Host Range" | awk '{print$5}')
@@ -263,12 +263,12 @@ else
 
   next_ip=$((WG_NEXT4 + exist_clients))
   ClientAddr="$WG_NET4$next_ip/$WG_PREFIX4"
-  if [ $IPV6E -eq 1 ]; then
+  if [[ $IPV6E -eq 1 ]]; then
     next_ip6=$((WG_NEXT6 + exist_clients))
     ClientAddr=$ClientAddr",$WG_NET6$next_ip6/$WG_PREFIX6"
   fi
   AllowIP="0.0.0.0/0"
-  if [ $IPV6E -eq 1 ]; then
+  if [[ $IPV6E -eq 1 ]]; then
     AllowIP=$AllowIP",::/0"
   fi
 
@@ -287,7 +287,7 @@ Endpoint = $EIPv4:$PORT
   qrencode -t ansiutf8 <"$WG_DIR/clients/$1.conf"
 
   ClientIP="$WG_NET4$next_ip/32"
-  if [ $IPV6E -eq 1 ]; then
+  if [[ $IPV6E -eq 1 ]]; then
     ClientIP=$ClientIP",$WG_NET6$next_ip6/128"
   fi
 
