@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # Express setup of WireGuard server
 # for Ubuntu 20.x and Later
@@ -135,14 +135,22 @@ if [ $INSTALLED -eq 0 ]; then
     if dpkg -l "${deb_packages[@]}" 1>/dev/null 2>/dev/null; then
       echo "All Packages Installed..."
     else
-      if lsof /var/lib/dpkg/lock >/dev/null; then
-        echo -n "Waiting free apt"
-        while lsof /var/lib/dpkg/lock >/dev/null; do
-          sleep 1
+      echo -n "Waiting free apt"
+      APT_BUSY=0
+      MS=20
+      while [[ 0 -ne $APT_BUSY || 0 -ne $MS ]]; do
+        MS=20
+        APT_BUSY=0
+        while [[ 0 -ne $MS ]]; do
+          if lsof /var/lib/dpkg/lock >/dev/null; then
+            APT_BUSY=1
+          fi
+          sleep 0.1
           echo -n .
+          MS=$((MS - 1))
         done
-        echo Ended.
-      fi
+      done
+      echo Ended.
       echo "Installing packages..."
       if ! apt-get install -y "${deb_packages[@]}" 1>/dev/null 2>/dev/null; then
         echo "Something wrong with installing packages: " "${deb_packages[@]}"
