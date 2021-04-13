@@ -137,9 +137,9 @@ if [ $INSTALLED -eq 0 ]; then
     else
       echo -n "Waiting free apt"
       APT_BUSY=0
-      MS=20
+      MS=30
       while [[ 0 -ne $APT_BUSY || 0 -ne $MS ]]; do
-        MS=20
+        MS=30
         APT_BUSY=0
         while [[ 0 -ne $MS ]]; do
           if lsof /var/lib/dpkg/lock >/dev/null; then
