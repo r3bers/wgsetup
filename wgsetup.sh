@@ -135,25 +135,30 @@ if [ $INSTALLED -eq 0 ]; then
     if dpkg -l "${deb_packages[@]}" 1>/dev/null 2>/dev/null; then
       echo "All Packages Installed..."
     else
-      echo -n "Waiting free apt"
-      APT_BUSY=0
-      MS=30
-      while [[ 0 -ne $APT_BUSY || 0 -ne $MS ]]; do
-        MS=30
-        APT_BUSY=0
-        while [[ 0 -ne $MS ]]; do
-          if lsof /var/lib/dpkg/lock >/dev/null; then
-            APT_BUSY=1
-          fi
-          sleep 0.1
-          echo -n .
-          MS=$((MS - 1))
-        done
-      done
-      echo Ended.
       echo "Installing packages..."
-      if ! apt-get install -y "${deb_packages[@]}" 1>/dev/null 2>/dev/null; then
-        echo "Something wrong with installing packages: " "${deb_packages[@]}"
+      TRYS=5
+      while ! apt-get install -y "${deb_packages[@]}" 1>/dev/null 2>/dev/null || $TRYS -ne 0; do
+        echo -n "Waiting free apt"
+        APT_BUSY=0
+        MS=30
+        while [[ 0 -ne $APT_BUSY || 0 -ne $MS ]]; do
+          MS=30
+          APT_BUSY=0
+          while [[ 0 -ne $MS ]]; do
+            if lsof /var/lib/dpkg/lock >/dev/null; then
+              APT_BUSY=1
+            fi
+            sleep 0.1
+            echo -n .
+            MS=$((MS - 1))
+          done
+        done
+        echo Ended.
+        TRYS=$((TRYS - 1))
+      done
+      if $TRYS -eq 0; then
+        echo "Something wrong with installing packages." "${deb_packages[@]}"
+        exit 1
       fi
     fi
     if hash ufw 2>/dev/null; then
