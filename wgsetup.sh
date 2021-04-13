@@ -130,13 +130,13 @@ if [[ $INSTALLED -eq 0 ]]; then
   deb_packages=(wireguard qrencode subnetcalc)
 
   if cat /etc/*release | grep ^NAME | grep "Debian\|Ubuntu" >/dev/null; then
-    if dpkg -l "${deb_packages[@]}" 1>/dev/null 2>/dev/null; then
+    if dpkg -l "${deb_packages[@]}"; then #1>/dev/null 2>/dev/null
       echo "All Packages Installed..."
     else
       echo "Installing packages..."
-      apt install -y "${deb_packages[@]}" 1>/dev/null 2>/dev/null
+      apt install -y "${deb_packages[@]}" # 1>/dev/null 2>/dev/null
       TRYS=20
-      while [[ $TRYS -ne 0 ]] || ! dpkg -l "${deb_packages[@]}" 1>/dev/null 2>/dev/null; do
+      while [[ $TRYS -ne 0 ]] || ! dpkg -l "${deb_packages[@]}"; do  #1>/dev/null 2>/dev/null
         echo -n "Waiting free apt"
         APT_BUSY=0
         MS=30
@@ -153,7 +153,7 @@ if [[ $INSTALLED -eq 0 ]]; then
           done
         done
         echo Ended.
-        apt install -y "${deb_packages[@]}" 1>/dev/null 2>/dev/null
+        apt install -y "${deb_packages[@]}" # 1>/dev/null 2>/dev/null
         ((TRYS--))
       done
       if [[ $TRYS -eq 0 ]]; then
