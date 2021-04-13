@@ -134,11 +134,8 @@ if [[ $INSTALLED -eq 0 ]]; then
       echo "All Packages Installed..."
     else
       echo "Installing packages..."
-      apt install -y "${deb_packages[@]}" 1>/dev/null 2>/dev/null
-      APT_INSTALLED=$?
-      echo $APT_INSTALLED
-      TRYS=20
-      while [[ $TRYS -ne 0 || $APT_INSTALLED -ne 0 ]]; do
+      TRYS=5
+      while [[ $TRYS -ne 0 ]] && ! apt install -y "${deb_packages[@]}" 1>/dev/null 2>/dev/null; do
         echo -n "Waiting free apt"
         APT_BUSY=0
         MS=30
@@ -155,9 +152,6 @@ if [[ $INSTALLED -eq 0 ]]; then
           done
         done
         echo Ended.
-        apt install -y "${deb_packages[@]}" 1>/dev/null 2>/dev/null
-        APT_INSTALLED=$?
-        echo $APT_INSTALLED
         ((TRYS--))
       done
       if [[ $TRYS -eq 0 ]]; then
