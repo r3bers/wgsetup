@@ -56,9 +56,7 @@ fi
 
 if ! [[ -f "/$WG_DIR/wg0.conf" ]]; then
   INSTALLED=0
-  echo "No wg0.conf. Creating..."
-  touch "/$WG_DIR/wg0.conf"
-  chmod 600 "/$WG_DIR/wg0.conf"
+  echo "No wg0.conf. Configuration started ..."
 fi
 
 if ! ip -6 a show scope global | grep inet6 >/dev/null; then IPV6E=0; fi
@@ -137,7 +135,7 @@ if [[ $INSTALLED -eq 0 ]]; then
     else
       echo "Installing packages..."
       TRYS=5
-      while ! apt-get install -y "${deb_packages[@]}" 1>/dev/null 2>/dev/null || [[ $TRYS -ne 0 ]]; do
+      while [[ $TRYS -ne 0 ]] || ! apt-get install -y "${deb_packages[@]}" 1>/dev/null 2>/dev/null; do
         echo -n "Waiting free apt"
         APT_BUSY=0
         MS=30
@@ -209,6 +207,9 @@ if [[ $INSTALLED -eq 0 ]]; then
     POST_UP=$POST_UP"; ip6tables -A FORWARD -i wg0 -j ACCEPT; ip6tables -t nat -A POSTROUTING -o $DEVv6 -j MASQUERADE"
     POST_DOWN=$POST_DOWN"; ip6tables -D FORWARD -i wg0 -j ACCEPT; ip6tables -t nat -D POSTROUTING -o $DEVv6 -j MASQUERADE"
   fi
+
+  touch "/$WG_DIR/wg0.conf"
+  chmod 600 "/$WG_DIR/wg0.conf"
 
   echo "[Interface]
 Address = $ExternalADDR
