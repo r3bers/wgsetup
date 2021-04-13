@@ -2,7 +2,7 @@
 
 Bash script for easy and fast WireGuard server deploy and clients profile create.
 
-ForUbuntu 20.x and later Use only on fresh installed machine. It will rewrite your iptables and WireGuard configuration.
+For Ubuntu 20.x and later Use only on fresh installed machine. It will rewrite your iptables and WireGuard configuration.
 
 Features:
 
@@ -19,3 +19,5 @@ Notes:
 
 After script is complete you can create client config files in unified format with same script.
 Config file will be saved to /etc/wireguard/clients/<clientname>.conf and it ready to use and QR Code will be saved /etc/wireguard/qr/<clientname>.png
+
+Quick start on clean machine: git clone https://github.com/r3bers/wgsetup.git && ./wgsetup/wgsetup.sh client
