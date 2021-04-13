@@ -10,7 +10,7 @@ Features:
 - Creates client configs in unified format and QR Code;
 - Choose of port;
 - IPv6 support.
-Usage: ./wgsetup.sh <clientname>
+Usage: ./wgsetup.sh &lt;clientname&gt;
 
 Before enabling IPv6 support ensure that your machine have IPv6 address.
 
